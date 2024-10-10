@@ -44,14 +44,20 @@ def draw_board():
             pygame.draw.rect(screen, color, pygame.Rect(col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 # Function to draw chess pieces on the board based on the current state
-def draw_pieces(board):
+def draw_pieces(board, dragging, start_square):
     for row in range(BOARD_SIZE):
         for col in range(BOARD_SIZE):
             # Get the piece on the current square
-            piece = board.piece_at(chess.square(col, 7 - row))  # Convert (row, col) to chess square notation
+            piece = board.piece_at(chess.square(col, 7 - row))
+            
+            # Skip drawing the piece that is being dragged
+            if dragging and (row, col) == start_square:
+                continue  # Don't draw the dragged piece on the board
+            
             if piece:
                 # Draw the corresponding image for the piece on the square
                 screen.blit(piece_images[piece.symbol()], pygame.Rect(col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
 
 # Function to handle piece dragging
 def drag_piece(start_square, board):
@@ -77,7 +83,6 @@ def main():
     running = True
     while running:
         draw_board()  # Draw the board
-        draw_pieces(board)  # Draw the pieces on the board
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # If user closes the window, stop the game
@@ -116,10 +121,16 @@ def main():
 
         # If a piece is being dragged, update its position with the mouse
         if dragging:
+            # Draw the board and pieces excluding the one being dragged
+            draw_pieces(board, dragging, start_square)
+            # Then draw the dragged piece at the current mouse position
             drag_piece(start_square, board)
+        else:
+            # Draw the board and all the pieces normally when not dragging
+            draw_pieces(board, dragging, start_square)
 
         pygame.display.flip()  # Update the display
-        clock.tick(60)  # Set the frame rate to 60 FPS
+        clock.tick(120)  # Set the frame rate to 60 FPS
 
     pygame.quit()  # Quit the game when the loop ends
 
